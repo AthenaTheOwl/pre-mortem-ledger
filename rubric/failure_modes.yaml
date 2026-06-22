@@ -1,0 +1,68 @@
+# Failure-mode rubric.
+#
+# Every failure mode in a pre-mortem is tagged with exactly one category
+# from this list. After a position is resolved, the eval-curator role
+# revisits this file and tightens descriptions based on what actually
+# happened. Keep entries narrow enough that two reviewers would tag the
+# same scenario the same way.
+
+categories:
+  - id: thesis-pillar-invalidation
+    name: Thesis pillar invalidation
+    description: |
+      A pillar of the original investment thesis is shown to be wrong —
+      not weaker, but reversed. Adjacent to the Thesis Pillar Tracker.
+
+  - id: capital-allocation-regime
+    name: Capital allocation regime change
+    description: |
+      Management changes how cash is deployed (buybacks → M&A; dividends
+      → reinvestment) in a way that breaks the original return model.
+
+  - id: operating-leverage-reversal
+    name: Operating leverage reversal
+    description: |
+      The fixed-cost structure that previously amplified upside now
+      amplifies downside as revenue softens.
+
+  - id: sector-rotation
+    name: Sector rotation
+    description: |
+      The position is correct on fundamentals but the sector is exited
+      by marginal capital, compressing the multiple regardless.
+
+  - id: regulatory-hit
+    name: Regulatory hit
+    description: |
+      A new rule, enforcement action, or jurisdiction loss directly
+      impairs the business model.
+
+  - id: key-person
+    name: Key-person dependency
+    description: |
+      Departure or incapacity of a founder, operator, or capital-allocator
+      whose judgment was part of the thesis.
+
+  - id: secondary-supply-shock
+    name: Secondary supply shock
+    description: |
+      A dilution event, large insider sale, or unlock that overwhelms
+      buyer demand independent of business performance.
+
+  - id: narrative-mean-reversion
+    name: Narrative mean-reversion
+    description: |
+      A premium attached to a story the market is no longer telling.
+      Fundamentals unchanged; multiple compresses to peers.
+
+  - id: customer-concentration
+    name: Customer concentration shock
+    description: |
+      Loss or material reduction from a top customer that was an
+      understated risk in the original thesis.
+
+  - id: cost-of-capital-shift
+    name: Cost-of-capital shift
+    description: |
+      A rate or credit-spread regime change that invalidates the
+      discount-rate assumption underlying the thesis.

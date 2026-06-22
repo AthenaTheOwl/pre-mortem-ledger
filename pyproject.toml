@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pre-mortem-ledger"
+version = "0.1.0"
+description = "Pre-Mortem Ledger — monthly forced pre-mortems on the largest active investing position."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+authors = [{ name = "Vignesh Gopalakrishnan" }]
+dependencies = [
+    "pydantic>=2.6",
+    "pyyaml>=6.0",
+    "jsonschema>=4.21",
+]
+
+[project.scripts]
+premortem = "pre_mortem_ledger.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/vigneshthegreat/pre-mortem-ledger"
+
+# uv automatically installs every group listed here on `uv sync`. Putting
+# these under the optional-dependencies table would silently break the
+# venv: those need an explicit extra flag.
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+]
+
+# Without `package = true`, uv treats this directory as a workspace root
+# and never installs the project itself into the venv — so
+# `python -m uv run pytest` falls back to the system Python and
+# `from pre_mortem_ledger import schema` raises ModuleNotFoundError.
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["pre_mortem_ledger"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

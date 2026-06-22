@@ -1,0 +1,17 @@
+# Registered positions for the pre-mortem rotation.
+#
+# `exposure_tier` is one of:
+#   concentrated — the position the monthly runner picks by default
+#   sized        — a normally-weighted position; eligible for quarterly
+#   probe        — a starter / option-like position; rarely scored
+#
+# `since` is the YYYY-MM the position first entered the book at this tier.
+# When two concentrated rows tie, the runner picks the longer-held one.
+
+positions:
+  - ticker: EXAMPLE
+    exposure_tier: concentrated
+    since: 2026-06
+    notes: |
+      Placeholder ticker for the v0.1 worked example. Replace with the
+      real concentrated position before the next monthly run.
