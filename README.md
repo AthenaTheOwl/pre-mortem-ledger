@@ -23,22 +23,31 @@ observability triggers, and the rolling status of each prior month's claims.
 
 ## Status
 
-v0 scaffold. No code, no ingestion, no rendered pre-mortems. Spec 0001
-defines the schema, the monthly run shape, and the gates that will land in
-spec 0002. Nothing here is wired to a real position yet.
+v0.1. Runnable CLI, schema, rubric, and the first ledger row are checked
+in. The `EXAMPLE` placeholder position is the only ticker registered;
+`config/positions.yaml` acquires the first real ticker in the next
+monthly run. See `STATUS.md` for the full state, known limits, and the
+next-feature queue.
 
 ## How to run
 
-Placeholder. The CLI lands in spec 0002. The intended shape:
-
 ```bash
-uv run premortem new --position <ticker> --month 2026-07
-uv run premortem status --month 2026-07
-uv run premortem render --month 2026-07
+python -m uv sync
+python -m uv run premortem new --month 2026-M07
+python -m uv run premortem status --file <path> --month 2026-M08 --id fm-1 --set unchanged
+python -m uv run premortem render --month 2026-M07
+python -m uv run premortem ledger record --month 2026-M07 --type monthly --positions EXAMPLE --modes 3
+python -m uv run premortem ledger list
 ```
 
-For now, read `specs/0001-foundation/` to see the planned schema and the
-first PR that follows this scaffold.
+The four gate scripts run locally:
+
+```bash
+python -m uv run pytest -q
+python -m uv run python scripts/voice_lint.py
+python -m uv run python scripts/spec_check.py
+python -m uv run python scripts/validate_premortem_schema.py examples/premortem-EXAMPLE-2026-M07.md
+```
 
 ## Layout
 
@@ -46,24 +55,48 @@ first PR that follows this scaffold.
 .
 ├── AGENTS.md
 ├── LICENSE
+├── PRODUCT_BRIEF.md         # half-page answer to "what does this repo decide?"
 ├── README.md
+├── STATUS.md                # current state / known limits / next feature queue
+├── SYSTEM_MAP.md            # inputs, outputs, gates, modules
+├── config/
+│   └── positions.yaml
+├── data/
+│   └── ledger/
+│       ├── runs.jsonl       # append-only ledger of scoring runs
+│       ├── 2026-M06.md      # human companion for the seed row
+│       └── README.md
+├── decisions/
+│   └── DEC-0001-v0.1-cut.md
 ├── docs/
-│   └── first-pr.md
-└── specs/
-    └── 0001-foundation/
-        ├── acceptance.md
-        ├── design.md
-        ├── requirements.md
-        └── tasks.md
+│   ├── METHODOLOGY.md
+│   ├── first-pr.md
+│   ├── product-brief.md
+│   └── system-map.md
+├── examples/
+│   └── premortem-EXAMPLE-2026-M07.md
+├── rubric/
+│   └── failure_modes.yaml
+├── schemas/
+│   └── premortem.schema.json
+├── scripts/
+│   ├── spec_check.py
+│   ├── validate_premortem_schema.py
+│   └── voice_lint.py
+├── specs/
+│   ├── 0001-foundation/
+│   └── 0002-design/
+├── pre_mortem_ledger/
+│   ├── __init__.py
+│   ├── cli.py
+│   ├── ledger.py
+│   ├── monthly.py
+│   ├── report.py
+│   ├── rubric.py
+│   ├── schema.py
+│   └── score.py
+└── tests/
 ```
-
-Future directories named in the spec:
-
-- `premortem/` — one Markdown file per (position, month).
-- `src/premortem/` — schema, CLI, rubric, status updater.
-- `config/positions.yaml` — registered positions + exposure tiers.
-- `rubric/failure_modes.yaml` — taxonomy of recurring failure categories.
-- `tests/` — schema validation + rubric tests.
 
 ## Why this exists
 
