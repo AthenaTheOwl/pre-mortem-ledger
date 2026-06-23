@@ -49,6 +49,29 @@ python -m uv run python scripts/spec_check.py
 python -m uv run python scripts/validate_premortem_schema.py examples/premortem-EXAMPLE-2026-M07.md
 ```
 
+## live demo
+
+A read-only snapshot of the committed pre-mortem and run ledger ships two ways.
+
+A no-arg CLI verb prints a ranked, readable view:
+
+```bash
+python -m uv run premortem show
+```
+
+And a Streamlit page (`streamlit_app.py`) reads the same committed
+artifacts and renders them as a browsable card view -- pick a failure
+mode, read its narrative and observability triggers, see the run ledger:
+
+```bash
+python -m uv run --with streamlit streamlit run streamlit_app.py
+```
+
+Deploy on Streamlit Cloud: repo `AthenaTheOwl/pre-mortem-ledger`, branch
+`main`, main file `streamlit_app.py`.
+
+<!-- live-url: (add the deployed Streamlit Cloud URL here) -->
+
 ## Layout
 
 ```
@@ -58,6 +81,8 @@ python -m uv run python scripts/validate_premortem_schema.py examples/premortem-
 ├── PRODUCT_BRIEF.md         # half-page answer to "what does this repo decide?"
 ├── README.md
 ├── STATUS.md                # current state / known limits / next feature queue
+├── streamlit_app.py         # browsable card view of the committed pre-mortem
+├── requirements.txt         # streamlit deploy deps
 ├── SYSTEM_MAP.md            # inputs, outputs, gates, modules
 ├── config/
 │   └── positions.yaml

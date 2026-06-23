@@ -124,6 +124,31 @@ def test_cli_ledger_record_refuses_duplicate(workspace, monkeypatch):
         main(args)
 
 
+def test_cli_show_prints_ranked_snapshot(capsys):
+    rc = main(["show"])
+    assert rc == 0
+    out = capsys.readouterr().out
+    # header + the committed example position
+    assert "pre-mortem" in out
+    assert "EXAMPLE" in out
+    # ranked failure modes appear in rank order
+    assert "fm-1" in out and "fm-2" in out and "fm-3" in out
+    assert out.index("fm-1") < out.index("fm-2") < out.index("fm-3")
+    # the ledger row shows up
+    assert "initialization" in out
+    # a headline finding is rendered, not just raw data
+    assert "headline:" in out
+    # ASCII-only so it renders cleanly in any terminal codepage
+    out.encode("ascii")
+
+
+def test_cli_show_handles_missing_premortem(tmp_path, capsys):
+    rc = main(["show", "--file", str(tmp_path / "nope.md")])
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "no committed pre-mortem" in out or "premortem new" in out
+
+
 def test_shipped_ledger_row_is_well_formed():
     rows = read_ledger(REPO_ROOT / "data" / "ledger" / "runs.jsonl")
     assert len(rows) == 1

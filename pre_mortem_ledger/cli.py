@@ -10,6 +10,10 @@ Plus the ledger surface for the control-plane framing:
 
     premortem ledger list
     premortem ledger record --month YYYY-Mnn --type {initialization,monthly,calibration}
+
+And a no-arg read-only snapshot of the committed state:
+
+    premortem show
 """
 
 from __future__ import annotations
@@ -34,6 +38,7 @@ from pre_mortem_ledger.monthly import (
     scaffold_premortem,
 )
 from pre_mortem_ledger.report import format_ledger_rows, render_month_index
+from pre_mortem_ledger.show import cmd_show
 from pre_mortem_ledger.schema import (
     append_status,
     dump_premortem_file,
@@ -79,6 +84,13 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="pre-mortem files to validate; defaults to the bundled examples/",
     )
+
+    p_show = sub.add_parser(
+        "show",
+        help="print a ranked, readable snapshot of the latest committed pre-mortem",
+    )
+    p_show.add_argument("--file", dest="show_file", default=None)
+    p_show.add_argument("--path", dest="show_ledger", default=None)
 
     p_ledger = sub.add_parser("ledger", help="ledger of scoring runs")
     ledger_sub = p_ledger.add_subparsers(dest="ledger_cmd", required=True)
@@ -238,6 +250,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return _cmd_render(args)
     if args.cmd == "validate":
         return _cmd_validate(args)
+    if args.cmd == "show":
+        kwargs = {}
+        if args.show_file is not None:
+            kwargs["premortem_path"] = args.show_file
+        if args.show_ledger is not None:
+            kwargs["ledger_path"] = args.show_ledger
+        return cmd_show(**kwargs)
     if args.cmd == "ledger":
         if args.ledger_cmd == "list":
             return _cmd_ledger_list(args)
