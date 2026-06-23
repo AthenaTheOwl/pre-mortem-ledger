@@ -19,6 +19,11 @@ import streamlit as st
 
 from pre_mortem_ledger.ledger import read_ledger
 from pre_mortem_ledger.schema import load_premortem_file
+from pre_mortem_ledger.score import (
+    brier_score,
+    outcome_for_status,
+    rank_to_prior,
+)
 
 HERE = Path(__file__).resolve().parent
 EXAMPLES_DIR = HERE / "examples"
@@ -141,3 +146,128 @@ else:
         f"nothing re-scored yet across {len(ledger)} ledger run(s) -- "
         "all modes still imagined, not observed."
     )
+
+st.divider()
+
+# ---------------------------------------------------------------------------
+# interactive: score the calibration yourself
+#
+# everything above reads the committed pre-mortem off disk. below, you drive
+# the repo's real calibration engine -- pre_mortem_ledger.score -- on input
+# you control. set each failure mode's rank (most-likely .. least-likely) and
+# what actually happened (its status), and the live Brier score recomputes via
+# the same rank_to_prior / outcome_for_status / brier_score functions the
+# `premortem ledger score` path uses. nothing is hardcoded here; the numbers
+# come straight out of the engine.
+# ---------------------------------------------------------------------------
+
+st.subheader("score the calibration yourself")
+st.caption(
+    "a pre-mortem ranks failure modes by how likely you think they are. months "
+    "later you mark what actually happened. the Brier score grades that forecast: "
+    "0.0 is perfect, higher is worse. set the ranks and the observed outcomes "
+    "below and the real engine recomputes it live."
+)
+
+_STATUS_CHOICES = ["unchanged", "evidence-emerging", "observed", "retired"]
+_STATUS_HELP = {
+    "unchanged": "trigger never fired -- a non-event (outcome 0.0)",
+    "evidence-emerging": "the named signal is starting to show up (outcome 0.5)",
+    "observed": "the failure mode actually played out (outcome 1.0)",
+    "retired": "no longer a live risk -- a non-event (outcome 0.0)",
+}
+
+with st.form("calibration"):
+    n_modes = st.slider(
+        "how many failure modes in this pre-mortem?",
+        min_value=1,
+        max_value=8,
+        value=min(len(pm.failure_modes), 8),
+        help="rank_to_prior maps rank 1 -> 0.6 and rank N -> 0.2 across this many modes.",
+    )
+
+    # seed defaults from the committed pre-mortem so the form starts on a real
+    # example, then let the user edit freely.
+    seeded = sorted(pm.failure_modes, key=lambda f: f.rank)
+    rows = []
+    for i in range(n_modes):
+        seed_fm = seeded[i] if i < len(seeded) else None
+        default_label = seed_fm.title if seed_fm else f"failure mode {i + 1}"
+        seed_status = (
+            seed_fm.status_log[-1].status
+            if seed_fm and seed_fm.status_log
+            else "unchanged"
+        )
+        cols = st.columns([1, 4, 3])
+        with cols[0]:
+            st.markdown(f"**rank {i + 1}**")
+            st.caption(f"prior {rank_to_prior(i + 1, n_modes):.2f}")
+        with cols[1]:
+            label = st.text_input(
+                "failure mode",
+                value=default_label,
+                key=f"label_{i}",
+                label_visibility="collapsed",
+            )
+        with cols[2]:
+            status = st.selectbox(
+                "what actually happened?",
+                _STATUS_CHOICES,
+                index=_STATUS_CHOICES.index(seed_status),
+                key=f"status_{i}",
+                label_visibility="collapsed",
+                help="\n".join(f"{k}: {v}" for k, v in _STATUS_HELP.items()),
+            )
+        rows.append((i + 1, label, status))
+
+    submitted = st.form_submit_button("compute Brier score")
+
+# build the (predicted, observed) pairs from user input and call the REAL
+# engine. predicted comes from rank_to_prior, observed from outcome_for_status,
+# and the grade from brier_score -- no reimplementation.
+pairs = [
+    (rank_to_prior(rank, n_modes), outcome_for_status(status))
+    for rank, _label, status in rows
+]
+score = brier_score(pairs)
+
+st.metric(
+    "live Brier score (pre_mortem_ledger.score.brier_score)",
+    f"{score:.4f}",
+    help="mean squared error of your priors against what you marked as observed; 0.0 is a perfect forecast.",
+)
+
+if score <= 0.10:
+    st.success(
+        "well calibrated -- your ranks lined up with what played out. "
+        "a low Brier is what a disciplined pre-mortem loop should converge toward."
+    )
+elif score <= 0.25:
+    st.info("middling calibration -- the ranking captured some of the outcome but not all of it.")
+else:
+    st.warning(
+        "poorly calibrated -- the things you ranked most likely are not the ones that "
+        "happened (or vice versa). this is exactly the drift the monthly ledger exists to surface."
+    )
+
+st.markdown("**(predicted prior, observed outcome) pairs fed to the engine**")
+pair_df = pd.DataFrame(
+    [
+        {
+            "rank": rank,
+            "failure mode": label,
+            "predicted prior": f"{rank_to_prior(rank, n_modes):.2f}",
+            "status": status,
+            "observed outcome": f"{outcome_for_status(status):.1f}",
+            "squared error": f"{(rank_to_prior(rank, n_modes) - outcome_for_status(status)) ** 2:.4f}",
+        }
+        for rank, label, status in rows
+    ]
+)
+st.dataframe(pair_df, hide_index=True, use_container_width=True)
+st.caption(
+    "every number above is computed by importing and calling the package: "
+    "`rank_to_prior`, `outcome_for_status`, and `brier_score` from "
+    "`pre_mortem_ledger.score`. flip a status from `unchanged` to `observed` "
+    "and watch the squared error and the Brier move."
+)
