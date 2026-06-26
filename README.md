@@ -1,33 +1,63 @@
-# Pre-Mortem Ledger
+# pre-mortem-ledger
 
-Monthly forced pre-mortem on the largest active investing position. For each
-position the ledger asks one question: if this is down 40% in 12 months, what
-is the most likely written-out reason? The answers become falsifiable claims
-tracked month-by-month against subsequent evidence.
+Once a month, the largest position in the book gets asked a single rude question: if you're down 40% a year from now, what's the written-out reason? The answer isn't a feeling. It's three to five named failure modes, each with a piece of evidence that would tell you it stopped being imaginary.
 
-## What this is
+## What it does
 
-Generic investing tools do post-mortems after the fact. This repo runs the
-opposite loop. Once a month, the largest position by exposure gets a
-pre-mortem write-up with 3-5 named failure modes. Each failure mode carries
-an observability trigger: a specific piece of evidence that, if observed,
-would mean the failure mode is moving from imagined to real. The next month
-the ledger revisits every open failure mode and updates its status.
+A post-mortem arrives after the loss, when the only thing left to do is name it. This runs the loop in the other direction. The biggest position by exposure gets a forced pre-mortem before anything goes wrong: 3-5 ranked failure modes, each one carrying an observability trigger — a specific thing you could watch for that would mean the failure has started to move from imagined to real.
 
-The repo answers one recurring decision: has any pre-mortem reason become
-observable enough this month to act on — trim, hedge, or hold?
+Then the ledger keeps the receipts. Next month it revisits every open failure mode and re-scores it against what actually happened. The recurring decision it serves is narrow: did any of last month's reasons become observable enough to act on — trim, hedge, or hold? Inputs are a position list, the prior pre-mortems, and your own notes. Outputs are `premortem/<position>-<year>-Mnn.md` with the ranked modes, their triggers, and the rolling status of every claim you've made so far. Resolved positions feed back into the rubric, so the failure-mode taxonomy gets sharper each cycle instead of staying a blank form.
 
-Inputs: position list, prior pre-mortems, and the user's investing notes.
-Outputs: `premortem/<position>-<year>-Mnn.md` with ranked failure modes,
-observability triggers, and the rolling status of each prior month's claims.
+## Try it
 
-## Status
+```bash
+python -m uv run premortem show
+```
 
-v0.1. Runnable CLI, schema, rubric, and the first ledger row are checked
-in. The `EXAMPLE` placeholder position is the only ticker registered;
-`config/positions.yaml` acquires the first real ticker in the next
-monthly run. See `STATUS.md` for the full state, known limits, and the
-next-feature queue.
+```
+pre-mortem -- EXAMPLE (concentrated), 2026-M07
+source: premortem-EXAMPLE-2026-M07.md
+
+3 failure modes, ranked by current read of likelihood:
+
+rank  failure mode                                          rubric category             status
+----------------------------------------------------------------------------------------------
+fm-1  Top customer renegotiates contract terms downward     customer-concentration      not yet re-scored
+fm-2  Capital allocation pivots from buybacks to opport...  capital-allocation-regime   not yet re-scored
+fm-3  Operating leverage reverses on flat revenue           operating-leverage-reve...  not yet re-scored
+
+top trigger to watch (fm-1):
+  - The customer's next earnings call names this vendor in a "vendor consolidation" or "cost discipline" section.
+  - A new framework contract is filed with materially shorter duration than the prior one.
+
+ledger:
+  2026-M06  initialization  positions=EXAMPLE  modes=3  brier=n/a
+
+headline: top failure mode for EXAMPLE is fm-1: Top customer renegotiates contract terms downward. nothing re-scored yet across 1 ledger run(s) -- all modes still imagined, not observed.
+```
+
+Ranked by current read of likelihood, worst first. Every mode reads "not yet re-scored" because the ledger has exactly one run on it — the imagined column is full and the observed column is empty, which is the honest state of a pre-mortem on day one.
+
+## Live demo
+
+The same committed pre-mortem and run ledger ship two ways. The CLI verb above is one. The other is a Streamlit page (`streamlit_app.py`) reading the same artifacts: pick a failure mode, read its narrative and its observability triggers, watch the run ledger fill in.
+
+```bash
+python -m uv run --with streamlit streamlit run streamlit_app.py
+```
+
+Deploy on Streamlit Cloud: repo `AthenaTheOwl/pre-mortem-ledger`, branch `main`, main file `streamlit_app.py`.
+
+<!-- live-url: (add the deployed Streamlit Cloud URL here) -->
+
+## How it connects
+
+The book it watches over is small and concentrated, and two siblings already track the upside:
+
+- [thesis-pillar-tracker](https://github.com/AthenaTheOwl/thesis-pillar-tracker) — the standing case for why each position is held.
+- [earnings-pillar-diff](https://github.com/AthenaTheOwl/earnings-pillar-diff) — what each earnings call did to that case.
+
+This is the missing third loop: the one that names the failure paths out loud before they show up in the price.
 
 ## How to run
 
@@ -49,88 +79,21 @@ python -m uv run python scripts/spec_check.py
 python -m uv run python scripts/validate_premortem_schema.py examples/premortem-EXAMPLE-2026-M07.md
 ```
 
-## live demo
-
-A read-only snapshot of the committed pre-mortem and run ledger ships two ways.
-
-A no-arg CLI verb prints a ranked, readable view:
-
-```bash
-python -m uv run premortem show
-```
-
-And a Streamlit page (`streamlit_app.py`) reads the same committed
-artifacts and renders them as a browsable card view -- pick a failure
-mode, read its narrative and observability triggers, see the run ledger:
-
-```bash
-python -m uv run --with streamlit streamlit run streamlit_app.py
-```
-
-Deploy on Streamlit Cloud: repo `AthenaTheOwl/pre-mortem-ledger`, branch
-`main`, main file `streamlit_app.py`.
-
-<!-- live-url: (add the deployed Streamlit Cloud URL here) -->
+v0.1. The CLI, schema, rubric, and the first ledger row are checked in. `EXAMPLE` is the only ticker registered; `config/positions.yaml` gets its first real one on the next monthly run. `STATUS.md` has the full state, the known limits, and the next-feature queue.
 
 ## Layout
 
 ```
-.
-├── AGENTS.md
-├── LICENSE
-├── PRODUCT_BRIEF.md         # half-page answer to "what does this repo decide?"
-├── README.md
-├── STATUS.md                # current state / known limits / next feature queue
-├── streamlit_app.py         # browsable card view of the committed pre-mortem
-├── requirements.txt         # streamlit deploy deps
-├── SYSTEM_MAP.md            # inputs, outputs, gates, modules
-├── config/
-│   └── positions.yaml
-├── data/
-│   └── ledger/
-│       ├── runs.jsonl       # append-only ledger of scoring runs
-│       ├── 2026-M06.md      # human companion for the seed row
-│       └── README.md
-├── decisions/
-│   └── DEC-0001-v0.1-cut.md
-├── docs/
-│   ├── METHODOLOGY.md
-│   ├── first-pr.md
-│   ├── product-brief.md
-│   └── system-map.md
-├── examples/
-│   └── premortem-EXAMPLE-2026-M07.md
-├── rubric/
-│   └── failure_modes.yaml
-├── schemas/
-│   └── premortem.schema.json
-├── scripts/
-│   ├── spec_check.py
-│   ├── validate_premortem_schema.py
-│   └── voice_lint.py
-├── specs/
-│   ├── 0001-foundation/
-│   └── 0002-design/
-├── pre_mortem_ledger/
-│   ├── __init__.py
-│   ├── cli.py
-│   ├── ledger.py
-│   ├── monthly.py
-│   ├── report.py
-│   ├── rubric.py
-│   ├── schema.py
-│   └── score.py
-└── tests/
+pre_mortem_ledger/        package: cli, ledger, monthly, report, rubric, schema, score
+config/positions.yaml     the registered tickers (EXAMPLE for now)
+rubric/failure_modes.yaml the failure-mode taxonomy that sharpens each cycle
+schemas/premortem.schema.json
+examples/                 the committed seed pre-mortem
+data/ledger/              append-only runs.jsonl + the M06 companion row
+scripts/                  the four local gates
+specs/  decisions/  docs/  tests/
+streamlit_app.py          browsable card view of the committed pre-mortem
 ```
-
-## Why this exists
-
-The user keeps a small, concentrated investing book. The portfolio already
-has a Thesis Pillar Tracker and an Earnings Call Pillar Diff. The missing
-loop is the forced pre-mortem: a structured exercise that names the
-failure paths before they show up in price action. Resolved positions feed
-back into the rubric so the failure-mode taxonomy sharpens with each
-cycle.
 
 ## License
 
