@@ -44,6 +44,7 @@ from pre_mortem_ledger.schema import (
     dump_premortem_file,
     load_premortem_file,
 )
+from pydantic import ValidationError
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -117,28 +118,46 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _cmd_new(args: argparse.Namespace) -> int:
     if args.position is None:
-        positions = load_positions(args.positions_file)
+        try:
+            positions = load_positions(args.positions_file)
+        except (FileNotFoundError, OSError) as exc:
+            print(f"cannot read positions file {args.positions_file!r}: {exc}", file=sys.stderr)
+            return 1
         target = pick_target(positions)
         ticker, tier = target.ticker, target.exposure_tier
     else:
         ticker, tier = args.position, "concentrated"
-    out = scaffold_premortem(
-        month=args.month, position=ticker, out_dir=args.out_dir, exposure_tier=tier
-    )
+    try:
+        out = scaffold_premortem(
+            month=args.month, position=ticker, out_dir=args.out_dir, exposure_tier=tier
+        )
+    except ValidationError as exc:
+        # e.g. --month BADMONTH; the schema wants 2026-M07.
+        print(f"invalid input: {exc}", file=sys.stderr)
+        return 1
     print(str(out))
     return 0
 
 
 def _cmd_status(args: argparse.Namespace) -> int:
-    pm = load_premortem_file(args.file)
-    updated = append_status(
-        pm,
-        month=args.month,
-        status=args.status,
-        evidence_ref=args.evidence,
-        note=args.note,
-        failure_mode_ids=[args.fm_id],
-    )
+    try:
+        pm = load_premortem_file(args.file)
+    except (FileNotFoundError, OSError) as exc:
+        print(f"cannot read pre-mortem file {args.file!r}: {exc}", file=sys.stderr)
+        return 1
+    try:
+        updated = append_status(
+            pm,
+            month=args.month,
+            status=args.status,
+            evidence_ref=args.evidence,
+            note=args.note,
+            failure_mode_ids=[args.fm_id],
+        )
+    except ValidationError as exc:
+        # e.g. --month 2026-13; the schema wants 2026-M07.
+        print(f"invalid input: {exc}", file=sys.stderr)
+        return 1
     dump_premortem_file(updated, args.file)
     print(f"appended {args.status} for {args.fm_id} at {args.month}")
     return 0
