@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 from pre_mortem_ledger.cli import main
-from pre_mortem_ledger.ledger import read_ledger
+from pre_mortem_ledger.ledger import LedgerRow, append_ledger, read_ledger
 from pre_mortem_ledger.schema import load_premortem_file
 
 
@@ -78,6 +78,11 @@ def test_cli_render_writes_index(workspace, monkeypatch):
     text = index.read_text(encoding="utf-8")
     assert "EXAMPLE" in text
     assert "2026-M07" in text
+    # the scaffold ships exactly 3 failure modes; pin the count and the
+    # position/tier bullet so replacing len(pm.failure_modes) with a
+    # literal bites here.
+    assert "3 failure modes" in text
+    assert "**EXAMPLE** (concentrated):" in text
 
 
 def test_cli_ledger_record_appends_row(workspace, monkeypatch):
@@ -124,6 +129,29 @@ def test_cli_ledger_record_refuses_duplicate(workspace, monkeypatch):
         main(args)
 
 
+def test_append_ledger_refuses_duplicate_month_run_type(tmp_path):
+    # Distinct run_ids so the run_id guard does not fire first; this pins
+    # the second guard: one run_type per month, regardless of run_id.
+    path = tmp_path / "runs.jsonl"
+    first = LedgerRow(
+        run_id="run-a",
+        month="2026-M07",
+        run_type="monthly",
+        positions_scored=["EXAMPLE"],
+        failure_modes_logged=3,
+    )
+    append_ledger(first, path)
+    second = LedgerRow(
+        run_id="run-b",
+        month="2026-M07",
+        run_type="monthly",
+        positions_scored=["OTHER"],
+        failure_modes_logged=3,
+    )
+    with pytest.raises(ValueError, match="already has a monthly run for 2026-M07"):
+        append_ledger(second, path)
+
+
 def test_cli_show_prints_ranked_snapshot(capsys):
     rc = main(["show"])
     assert rc == 0
@@ -138,6 +166,11 @@ def test_cli_show_prints_ranked_snapshot(capsys):
     assert "initialization" in out
     # a headline finding is rendered, not just raw data
     assert "headline:" in out
+    # the "top trigger to watch" and the fallback headline both name the
+    # rank-1 fm (fm-1), not the rank-3 one. this bites if the min(...)
+    # selection in show.py is flipped to max(...).
+    assert "top trigger to watch (fm-1):" in out
+    assert "top failure mode for EXAMPLE is fm-1:" in out
     # ASCII-only so it renders cleanly in any terminal codepage
     out.encode("ascii")
 
