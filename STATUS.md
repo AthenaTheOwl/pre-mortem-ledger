@@ -32,6 +32,10 @@ Cut: v0.1, recorded 2026-06-22.
   and enumerates what triggers a methodology revisit.
 - `decisions/DEC-0001-v0.1-cut.md` records the design decisions behind
   this cut.
+- `.github/workflows/ci.yml` runs pytest, a compile check,
+  `scripts/spec_check.py`, and `scripts/voice_lint.py` on push and pull
+  request. `scripts/validate_premortem_schema.py` is covered inside the
+  pytest suite, not as a separate CI step.
 
 ## Known limits
 
@@ -44,16 +48,12 @@ Cut: v0.1, recorded 2026-06-22.
 - `config/positions.yaml` still names only the `EXAMPLE` placeholder.
   No real position has been registered. The next monthly run is the
   first one that touches the real book.
-- No CI workflow. The four gate scripts (`pytest`, `voice_lint`,
-  `spec_check`, `validate_premortem_schema`) run locally only.
 - No cross-repo evidence ingestion. Triggers fire on user-supplied
   evidence references in `status_log` entries, not on signals pulled
   from a Thesis Pillar Tracker sibling.
 
 ## Next feature queue
 
-- Wire CI: a GitHub Actions workflow that runs `pytest`, `voice_lint`,
-  `spec_check`, and `validate_premortem_schema` on every push.
 - Brier back-scoring: spec 0003 pass that compares the previous month's
   `status_log` entries against realized outcomes and writes a
   `prior_run_brier` into the next monthly ledger row.
@@ -65,31 +65,3 @@ Cut: v0.1, recorded 2026-06-22.
 - Add `premortem ledger score --month <m>` that computes the Brier
   delta in one command instead of requiring the caller to pass
   `--brier`.
-
-- Resolve factory defect: missing PRODUCT_BRIEF.md,SYSTEM_MAP.md
-- Resolve factory defect: missing data/ledger/*.jsonl
-- Resolve factory defect: METHODOLOGY.md missing revisit section
-- Resolve factory defect: pyproject warnings - dev under optional-deps -- move to dependency-groups
-- Resolve factory defect: PRODUCT_BRIEF.md is required for active repos
-- Resolve factory defect: SYSTEM_MAP.md is required for active repos
-- Resolve factory defect: expected file 'PRODUCT_BRIEF.md' is missing
-- Resolve factory defect: expected file 'SYSTEM_MAP.md' is missing
-- Resolve factory defect: expected file 'pre_mortem_ledger/cli.py' is missing
-- Resolve factory defect: expected file 'pre_mortem_ledger/score.py' is missing
-- Resolve factory defect: expected file 'pre_mortem_ledger/ledger.py' is missing
-- Resolve factory defect: expected glob 'data/ledger/*.jsonl' matched no files
-- Resolve factory defect: expected glob 'decisions/DEC-*.md' matched no files
-- Resolve factory defect: module 'cli' declares source 'pre_mortem_ledger/cli.py', but it is missing
-- Resolve factory defect: module 'score' declares source 'pre_mortem_ledger/score.py', but it is missing
-- Resolve factory defect: module 'ledger' declares source 'pre_mortem_ledger/ledger.py', but it is missing
-- Resolve factory defect: module 'report' declares source 'pre_mortem_ledger/report.py', but it is missing
-- Resolve factory defect: claude_code review requested patch; inspect defect log
-- Resolve factory defect: pyproject warnings - dev under optional-deps -- move to dependency-groups
-- Resolve factory defect: expected file 'pre_mortem_ledger/cli.py' is missing
-- Resolve factory defect: expected file 'pre_mortem_ledger/score.py' is missing
-- Resolve factory defect: expected file 'pre_mortem_ledger/ledger.py' is missing
-- Resolve factory defect: module 'cli' declares source 'pre_mortem_ledger/cli.py', but it is missing
-- Resolve factory defect: module 'score' declares source 'pre_mortem_ledger/score.py', but it is missing
-- Resolve factory defect: module 'ledger' declares source 'pre_mortem_ledger/ledger.py', but it is missing
-- Resolve factory defect: module 'report' declares source 'pre_mortem_ledger/report.py', but it is missing
-- Resolve factory defect: claude_code review requested patch; inspect defect log
