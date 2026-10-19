@@ -25,9 +25,7 @@ trigger. You need the delivery date or a documented reason it cannot be observed
 Likewise, a renamed product or revised target should not silently replace the
 original event definition.
 
-[AI Product Team's change workflow](https://github.com/3orionkings/ai-product-team/blob/main/workflows/process-change.md)
-provides the historical-versus-current applicability distinction. The protocol
-here changes evidence handling, not your positions or the threshold for any
-financial action. The checked-in `EXAMPLE` corpus remains illustrative. No real
-holding, new market observation, order, alert or investment recommendation is
-created by this note.
+The protocol here changes evidence handling, not your positions or the threshold
+for any financial action. The checked-in `EXAMPLE` corpus remains illustrative.
+No real holding, new market observation, order, alert or investment
+recommendation is created by this note.
