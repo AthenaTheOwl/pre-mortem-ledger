@@ -8,8 +8,9 @@ For each monthly review, attach the dated source, the observable event it
 supports, and the failure-mode identifier it bears on. Distinguish a primary
 announcement from a later interpretation or a duplicate report of the same
 announcement. Two briefs that cite the same underlying filing supply one event.
-An absence of new evidence should remain an absence; do not manufacture an
-`unchanged` observation from a quiet reading week.
+An absence of new evidence should remain an absence. `unchanged` means the
+trigger has not fired (`docs/METHODOLOGY.md`); record it after checking the
+trigger's own source, and leave a quiet reading week out of the evidence.
 
 Use separate roles for proposing an interpretation and checking its evidence.
 The checker should read your original trigger and the primary material before
