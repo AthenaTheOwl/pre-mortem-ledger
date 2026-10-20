@@ -16,7 +16,12 @@ Use separate roles for proposing an interpretation and checking its evidence.
 The checker should read your original trigger and the primary material before
 reading the proposed status. Then record whether the trigger is observed,
 unobserved, contradicted, or unmeasurable with the available source. Map that
-assessment to the status values the existing ledger actually supports; retain
+assessment to the status values the existing ledger actually supports: observed
+is `observed`; partial evidence aligned with the trigger is `evidence-emerging`;
+unobserved or contradicted, after checking the trigger's own source, is
+`unchanged` with `--evidence` naming that source. No status fits an
+unmeasurable trigger. Do not record it as `unchanged` or `retired`, since the
+scorer counts both as a non-event; put the reason in a linked note. Retain
 extra analysis in a linked note rather than inventing schema fields.
 
 An illustrative failure mode is that a promised delivery slips past the dated
