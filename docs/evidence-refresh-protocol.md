@@ -1,13 +1,13 @@
 # Refresh the evidence without rewriting the pre-mortem
 
 You wrote a failure mode before observing its outcome. Preserve that original
-claim when a new brief changes your view. Otherwise the ledger gradually becomes
-a record of what you now believe you predicted.
+claim when a new source or note changes your view. Otherwise the ledger
+gradually becomes a record of what you now believe you predicted.
 
 For each monthly review, attach the dated source, the observable event it
 supports, and the failure-mode identifier it bears on. Distinguish a primary
 announcement from a later interpretation or a duplicate report of the same
-announcement. Two briefs that cite the same underlying filing supply one event.
+announcement. Two notes that cite the same underlying filing supply one event.
 An absence of new evidence should remain an absence. `unchanged` means the
 trigger has not fired (`docs/METHODOLOGY.md`); record it after checking the
 trigger's own source, and leave a quiet reading week out of the evidence.

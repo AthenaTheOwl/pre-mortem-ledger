@@ -53,7 +53,7 @@ Deploy on Streamlit Cloud: repo `AthenaTheOwl/pre-mortem-ledger`, branch `main`,
 ## How it connects
 
 The [evidence refresh protocol](docs/evidence-refresh-protocol.md) preserves the
-original failure modes while reviewing new brief evidence, deduplicates repeated
+original failure modes while reviewing new evidence, deduplicates repeated
 reporting of one event, and separates the proposed interpretation from the
 checker who verifies whether the original trigger was observed.
 
