@@ -52,11 +52,6 @@ Deploy on Streamlit Cloud: repo `AthenaTheOwl/pre-mortem-ledger`, branch `main`,
 
 ## How it connects
 
-The [evidence refresh protocol](docs/evidence-refresh-protocol.md) preserves the
-original failure modes while reviewing new brief evidence, deduplicates repeated
-reporting of one event, and separates the proposed interpretation from the
-checker who verifies whether the original trigger was observed.
-
 The book it watches over is small and concentrated, and two siblings already track the upside:
 
 - [thesis-pillar-tracker](https://github.com/AthenaTheOwl/thesis-pillar-tracker) — the standing case for why each position is held.
@@ -85,6 +80,8 @@ python -m uv run python scripts/validate_premortem_schema.py examples/premortem-
 ```
 
 v0.1. The CLI, schema, rubric, and the first ledger row are checked in. `EXAMPLE` is the only ticker registered; `config/positions.yaml` gets its first real one on the next monthly run. `STATUS.md` has the full state, the known limits, and the next-feature queue.
+
+The [evidence refresh protocol](docs/evidence-refresh-protocol.md) preserves the original failure modes while reviewing new evidence, deduplicates repeated reporting of one event, and separates the proposed interpretation from the checker who verifies whether the original trigger was observed.
 
 ## Layout
 
